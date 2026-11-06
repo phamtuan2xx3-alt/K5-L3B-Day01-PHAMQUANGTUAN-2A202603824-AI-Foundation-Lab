@@ -1,123 +1,116 @@
 # Báo cáo cá nhân — Day 01: Lọc tin nhắn rác
 
-- **SEED:** 7646
-- Thông tin định danh nằm trong tên file theo quy định bảo mật của repo.
-- Báo cáo được biên soạn với AI hỗ trợ, từ kết quả học viên cung cấp trong phiên làm bài.
+- **SEED:** 7646.
+- **Nguồn:** output lưu trong [day01_lab.ipynb](day01_lab.ipynb), đối chiếu với JSON xuất cuối. Chỉ số ô dưới đây đếm từ 0 trong danh sách cells của file, không phải số lần thực thi Colab.
+- Báo cáo được tổng hợp với AI hỗ trợ. Khi văn bản trả lời trong notebook khác output, dùng output làm bằng chứng.
 
 ## 1. Bằng chứng
 
 | Tệp | Trạng thái |
 | --- | --- |
-| [day01_lab.ipynb](day01_lab.ipynb) | Đã có bản Colab hoàn chỉnh với output, không còn NotImplementedError hoặc output lỗi |
-| [lab1_report.json](lab1_report.json) | Đã có file gốc xuất từ Colab: SEED 7646, challenge=2 (đề #3), đủ 10 dự đoán, 14/14 check được ghi đạt |
-| [hand_calc.jpg](hand_calc.jpg) | Đã có ảnh viết tay câu 1–4, có bước tính |
-| [hand_calc_2.jpg](hand_calc_2.jpg) | Đã có ảnh viết tay câu 5, tổng 10.50 USD/ngày |
+| [day01_lab.ipynb](day01_lab.ipynb) | 102 ô, 49 ô có output; không còn raise NotImplementedError, không có output loại error |
+| [lab1_report.json](lab1_report.json) | File xuất gốc, kết quả phù hợp bảng tổng hợp trong notebook |
+| [hand_calc.jpg](hand_calc.jpg) | Ảnh tính tay câu 1–4 |
+| [hand_calc_2.jpg](hand_calc_2.jpg) | Ảnh tính tay câu 5 |
+
+Ô 100 ghi SEED=7646, đề #3, 14/14 check đạt và đủ 10 dự đoán. Danh sách không có check 4.1 + 4.4, nên 14/14 chưa chứng minh đủ mọi check của đề. Ô 95 xác nhận năm giá trị tính tay: 0.87, 0.50, 0.73, 0.60, 10.50.
 
 ## 2. Kết quả chính
 
-### Kết quả lần xuất cuối — dùng làm mốc chính
+Ô 10: sau bỏ trùng có 5.169 tin, 653 spam, 4.516 ham. Train/val/test là 3.619/775/775; train có 457 spam, test có 101 spam; SUB có 40 tin.
 
-Các số liệu dưới đây lấy trực tiếp từ `lab1_report.json` được xuất cuối cùng. Bảng và phân tích lần chạy trước ở các mục sau được giữ để phân biệt biến động giữa các lần đo, không thay thế dữ liệu gốc này.
+Bảng chép output ô 79, giữ ba chữ số thập phân:
 
-| Phương án | F1 test | F1 SUB 40 | Train (s) | Tin/s cả lô | p95 (ms/tin) | USD/1.000 tin |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| BoW + LogReg | 0.902 | 0.947 | 7.597 | 7852.556 | 0.121 | 0 |
-| BoW + MLP | 0.969 | 1.000 | 8.146 | 24820.638 | 0.412 | 0 |
-| Encoder + kNN | 0.879 | 0.947 | 2.101 | 48.330 | 64.557 | 0 |
-| Encoder + LogReg | 0.935 | 1.000 | 2.481 | 1134.131 | 10.496 | 0 |
-| Encoder + MLP head | 0.955 | 1.000 | 3.546 | 1112.644 | 16.613 | 0 |
-| Sonnet zero-shot | 0.974* | 0.974 | 0 | 0.501 | 2495.185 | 0.2262 |
-| Opus Thinking zero-shot | 1.000* | 1.000 | 0 | 0.463 | 2852.545 | 0.3770 |
-| Sonnet few-shot | 1.000* | 1.000 | 0 | 0.678 | 2027.748 | 0.6422 |
+| Phương án | Precision | Recall | F1 test | F1 SUB | Train (s) | Tin/s cả lô | p50 ms | p95 ms | USD/1k |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| BoW + LogReg | 1.000 | 0.822 | 0.902 | 0.947 | 7.597 | 7852.556 | 0.051 | 0.121 | 0.000 |
+| BoW + MLP | 1.000 | 0.941 | 0.969 | 1.000 | 8.146 | 24820.638 | 0.329 | 0.412 | 0.000 |
+| Encoder + kNN | 0.832 | 0.931 | 0.879 | 0.947 | 2.101 | 48.330 | 23.957 | 64.557 | 0.000 |
+| Encoder + LogReg | 0.949 | 0.921 | 0.935 | 1.000 | 2.481 | 1134.131 | 9.511 | 10.496 | 0.000 |
+| Encoder + MLP head | 0.960 | 0.950 | 0.955 | 1.000 | 3.546 | 1112.644 | 8.511 | 16.613 | 0.000 |
+| Sonnet zero-shot | 1.000 | 0.950 | 0.974* | 0.974 | 0.000 | 0.501 | 1965.063 | 2495.185 | 0.226 |
+| Opus Thinking zero-shot | 1.000 | 1.000 | 1.000* | 1.000 | 0.000 | 0.463 | 2155.892 | 2852.545 | 0.377 |
+| Sonnet few-shot | 1.000 | 1.000 | 1.000* | 1.000 | 0.000 | 0.678 | 1437.746 | 2027.748 | 0.642 |
 
-Ở lần cuối, Opus cao hơn Sonnet khoảng 0.026 F1 và few-shot tăng Sonnet từ 0.974 lên 1.000. Chênh lệch nhỏ trên 40 tin chưa đủ khẳng định ưu thế chắc chắn. kNN không đạt SLA ở lần này (p95 64.557 ms); BoW + LogReg, BoW + MLP, Encoder + LogReg và Encoder + MLP head đạt. Các LLM vẫn vượt SLA. Chi phí/tháng tham khảo với 300 triệu tin lần lượt khoảng 67.860, 113.100 và 192.660 USD theo các số chưa làm tròn.
+* LLM chỉ đo trên SUB, không phải toàn bộ test. Ô 62 chọn 9router_claude với ag/claude-sonnet-4-6 và ag/claude-opus-4-6-thinking, giới hạn 2048 token. Chi phí là ước tính theo số từ và giá tham khảo, chưa gồm suy luận ẩn; không phải hóa đơn 9Router. Model cục bộ chưa tính chi phí hạ tầng.
 
-JSON có đủ 10 dự đoán với thời gian. Dự đoán `llm_fewshot` vẫn nói zero-shot đã đạt 1.000, phù hợp với lần chạy trước nhưng khác lần xuất cuối 0.974; giữ nguyên log gốc thay vì sửa lại dự đoán. JSON chưa có check `4.1 + 4.4 call_openai / llm_classify_batch`, nên 14/14 không chứng minh đã đủ mọi check của đề. Cần chạy lại ô kiểm tra đó và xuất lại JSON để bổ sung bằng chứng.
-
-Notebook hiện lưu kết quả đánh giá 50 case gốc; các kết quả 55 case ở mục 4 là kết quả học viên đã gửi từ lần chạy trước. Muốn notebook chứa bằng chứng 55 case cần chạy lại ô đánh giá sau ô thêm `MY_CASES`, rồi tải lại notebook.
-
-### Số liệu lần chạy trước — dùng đối chiếu
-
-Dữ liệu sau bỏ trùng: 5.169 tin, gồm 4.516 ham và 653 spam. Train/val/test lần lượt 3.619/775/775 tin. SUB có 40 tin cân bằng.
-
-| Phương án | F1 test | F1 SUB 40 | Train (s) | Tin/s cả lô | p95 (ms/tin) | USD/1.000 tin |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| BoW + LogReg | 0.902 | 0.947 | 9.140 | 10651.483 | 0.241 | 0 |
-| BoW + MLP | 0.969 | 1.000 | 10.906 | 15134.281 | 0.374 | 0 |
-| Encoder + kNN | 0.879 | 0.947 | 2.240 | 115.349 | 18.470 | 0 |
-| Encoder + LogReg | 0.935 | 1.000 | 2.588 | 1287.705 | 7.036 | 0 |
-| Encoder + MLP head | 0.955 | 1.000 | 3.285 | 1646.787 | 9.428 | 0 |
-| Sonnet zero-shot | 1.000* | 1.000 | 0 | 0.628 | 2200.783 | 0.226 |
-| Opus Thinking zero-shot | 1.000* | 1.000 | 0 | 0.520 | 2319.178 | 0.377 |
-| Sonnet few-shot | 1.000* | 1.000 | 0 | 0.544 | 2388.752 | 0.642 |
-
-\* LLM chỉ được đánh giá trên SUB, không phải toàn bộ test. Model thực dùng qua 9Router: `ag/claude-sonnet-4-6` và `ag/claude-opus-4-6-thinking`. Chi phí là ước tính theo số từ và giá API tham khảo Sonnet 3/15 USD, Opus 5/25 USD mỗi triệu token input/output; chưa tính token suy luận ẩn và không phải hóa đơn 9Router. Giá 0 của model cục bộ không bao gồm hạ tầng.
+Ô 73: Sonnet zero-shot $0.00905/40 tin, Opus $0.01508/40 tin. Ô 76: few-shot $0.02569/40 tin. Cả ba invalid=0. Tính từ số tiền hiển thị: Opus đắt khoảng 1.67 lần Sonnet; few-shot đắt khoảng 2.84 lần zero-shot.
 
 ## 3. Dự đoán và thực tế
 
-Các dự đoán dưới đây được đối chiếu theo nội dung trao đổi; thời điểm và nguyên văn cần được xác nhận bằng JSON xuất từ notebook.
+Ba dự đoán và thời điểm có trong output ô 100:
 
-1. **Learning rate:** dự đoán lr=50 có thể dao động hoặc tăng mạnh. Thực tế loss tăng vọt ban đầu rồi giảm đến 0.006; learning rate lớn không đồng nghĩa luôn phân kỳ. lr=0.001 học chậm, loss cuối 0.627, còn lr=0.5 đạt 0.086.
-2. **Bỏ ReLU:** dự đoán F1 giảm so với MLP. Thực tế hai mạng cùng F1 0.969 ở ba chữ số thập phân. Hai Linear không ReLU vẫn tương đương một phép affine; khả năng biểu diễn phi tuyến chưa cải thiện F1 ở phép đo này. Cách tối ưu khác khiến kết quả không nhất thiết bằng LogReg NumPy.
-3. **Model lớn/nhỏ:** dự đoán Opus có thể cao hơn Sonnet 0.02–0.05 F1. Thực tế cả hai đạt 1.000 trên SUB. Tập nhỏ và tác vụ đơn giản chưa cho thấy lợi ích model lớn; Opus có chi phí tham khảo cao hơn khoảng 1.67 lần. Few-shot cũng giữ F1 nhưng tăng chi phí khoảng 2.84 lần.
+1. **ml_f1, 16:18:33:** dự đoán F1 khoảng 0.84, precision cao hơn recall. Ô 25 cho F1=0.902, precision=1.000, recall=0.822. F1 cao hơn dự đoán khoảng 0.062; hướng precision/recall đúng. Mô hình chưa bắt hết spam thật.
+2. **dl_curve, 16:19:10:** dự đoán MLP gần bằng hoặc nhỉnh hơn LogReg. Ô 40 cho F1=0.969 so với 0.902, tăng khoảng 0.067. Lớp ẩn có thể khai thác tổ hợp feature hữu ích; chưa chứng minh luôn tốt hơn. Chỉ số val loss thấp nhất là 7, tức vòng học thứ 8.
+3. **dl_relu, 16:19:18:** dự đoán bỏ ReLU làm giảm F1. Ô 43 vẫn ghi F1=0.969, bằng mạng có ReLU ở độ chính xác hiển thị. Hai Linear không phi tuyến vẫn gộp thành một phép affine; cách tối ưu khác nên không nhất thiết bằng LogReg NumPy.
 
-## 4. Phân tích stress test và case bổ sung
+Dự đoán llm_models lúc 16:19:57 cho rằng Opus hơn Sonnet 0.02–0.05 F1; output chênh khoảng 0.026, nhưng SUB nhỏ nên chưa đủ khẳng định ưu thế ổn định. Dự đoán few-shot lúc 16:22:46 nói zero-shot đã đạt 1.000, không khớp output đang lưu 0.974. Giữ nguyên log gốc, không sửa dự đoán sau khi biết kết quả. Output few-shot thực tế tăng F1 lên 1.000, chi phí tăng khoảng 2.84 lần.
 
-| Model | F1 SUB | F1 50 case gốc | Accuracy 50 case | F1 55 case | Accuracy 55 case |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| BoW + LogReg | 0.947 | 0.378 | 0.54 | 0.341 | 0.509 |
-| BoW + MLP | 1.000 | 0.410 | 0.54 | 0.409 | 0.527 |
-| Encoder + kNN | 0.947 | 0.737 | 0.70 | 0.738 | 0.691 |
-| Encoder + LogReg | 1.000 | 0.667 | 0.66 | 0.607 | 0.600 |
-| Encoder + MLP head | 1.000 | 0.706 | 0.70 | 0.643 | 0.636 |
-| Sonnet zero-shot | 1.000 | 0.982 | 0.98 | 0.984 | 0.982 |
-| Sonnet + phòng thủ | 1.000** | 1.000 | 1.00 | 0.985 | 0.982 |
+## 4. Phân tích stress test
 
-\** Cột SUB của phương án phòng thủ được code lấy từ zero-shot làm mốc; chưa đo prompt phòng thủ trên SUB.
+Ô 88 lưu kết quả **50 case gốc**:
 
-BoW + MLP giảm mạnh nhất: F1 giảm 0.590 trên 50 case gốc. Test thường cùng phân phối với train, còn các mẫu spam gần trùng có thể khác số hoặc mã thưởng, nên kết quả dễ lạc quan. BoW chỉ nhìn token rời rạc: trên 50 case, MLP đúng 0% spam giọng tự nhiên và 17% né từ khóa. Embedding biểu diễn nghĩa tốt hơn nhưng vẫn gặp khó khi phân biệt ý định và lời trích dẫn.
+| Model | F1 SUB làm mốc | F1 50 case | Accuracy 50 case |
+| --- | ---: | ---: | ---: |
+| BoW + LogReg | 0.947 | 0.378 | 0.54 |
+| BoW + MLP | 1.000 | 0.410 | 0.54 |
+| Encoder + kNN | 0.947 | 0.737 | 0.70 |
+| Encoder + LogReg | 1.000 | 0.667 | 0.66 |
+| Encoder + MLP head | 1.000 | 0.706 | 0.70 |
+| Sonnet zero-shot | 0.974 | 0.982 | 0.98 |
+| Sonnet + prompt phòng thủ | 0.974** | 1.000 | 1.00 |
 
-Hai lỗi cụ thể:
+** Mốc SUB của prompt phòng thủ được code lấy từ zero-shot; chưa đo prompt phòng thủ trên SUB.
 
-- Tin thúc giục giữ phần thưởng tài khoản trước khi hết hạn tối nay bị BoW đoán ham, còn Encoder + LogReg đoán đúng spam trong thí nghiệm 3.B. Sự kết hợp áp lực thời gian và yêu cầu xác nhận thông tin không được BoW biểu diễn đầy đủ.
-- Case bổ sung **#101** là yêu cầu kiểm thử bộ lọc, trích một câu nhận thưởng và `Label: spam`, nhãn thật ham. Sonnet có prompt phòng thủ đoán spam. Quy tắc xem nhãn giả là dấu hiệu spam mạnh có thể làm model chặn nhầm nội dung kiểm thử hợp lệ.
+BoW + MLP tụt nhiều nhất: 1.000 xuống 0.410, giảm 0.590 theo số hiển thị. Test thường cùng phân phối với train; mẫu gần trùng vẫn có thể còn sau bỏ trùng tuyệt đối. BoW nhìn token rời rạc, embedding biểu diễn nghĩa, LLM xử lý ngữ cảnh; đây là cách giải thích xu hướng, không phải bằng chứng nguyên nhân nội bộ của từng dự đoán.
 
-Trên 55 case, cả hai prompt LLM đều đúng 54/55: phòng thủ cải thiện nhóm spam tự nhiên từ 91% lên 100% nhưng làm nhóm nói về spam giảm từ 100% xuống 80%. Nhóm injection đều 100%, nên chưa thấy cải thiện ở nhóm này. Không có case tất cả model cùng sai.
+Ô 89 ghi 0 case tất cả model cùng sai, và prompt phòng thủ sai 0/50. Bộ case viết tay giúp phát hiện điểm yếu nhưng không đại diện tỷ lệ spam thực tế.
 
-Năm case bổ sung được AI đề xuất, gồm trích ví dụ injection trong lớp học, trao đổi dữ liệu kiểm thử, giả người cùng nhóm nhờ chuyển tiền, giả hoàn tiền yêu cầu thông tin thẻ và giả thu phí giao lại hàng. Đây không phải các case hoàn toàn tự nghĩ. Để bổ sung bằng chứng, cần giữ nội dung và giải thích bẫy riêng cho từng case trong notebook. Chuẩn hóa ký tự như `fr€€` có thể hỗ trợ BoW nhưng có nguy cơ làm sai tên riêng hoặc số hợp lệ. Bộ case viết tay phục vụ tìm điểm yếu, không đại diện tần suất spam thật và không đủ để ước lượng chất lượng triển khai.
+Hai lỗi cụ thể được output xác nhận, dùng minh họa cơ chế lỗi; không gán chúng thành lỗi trong bộ stress test:
+
+- Ô 58: “Last chance! Your account rewards expire tonight…” là spam, BoW đoán ham, Encoder + LogReg đoán spam. BoW không biểu diễn đầy đủ ý nghĩa kết hợp hạn chót và yêu cầu xác nhận thông tin. Tổng thí nghiệm: BoW 5/6, Encoder + LogReg 6/6.
+- Ô 73: Sonnet bỏ sót spam bắt đầu “Dear Voucher holder Have your next meal on us…”. Nội dung ưu đãi có thể bị đọc như thông báo hợp lệ; output không chứng minh nguyên nhân cụ thể. Đây là lỗi SUB, không phải case đã xác định trong stress test.
+
+Output hiện chưa liệt kê hai ID lỗi cụ thể của BoW/embedding trên bộ 50 case. Cần chạy ô đọc lỗi với model tương ứng để bổ sung; không tự gán dự đoán chưa quan sát được.
+
+### Case bổ sung
+
+Ô 92 chứa 5 case ID 100–104 có AI hỗ trợ đề xuất; output xác nhận tổng 55 case. Nhưng chưa có output đánh giá lại 55 case trong file này. Vì vậy không đưa kết quả 55 case hoặc khẳng định #101 bị đoán sai vào báo cáo. Muốn có bằng chứng cần chạy lại ô 88 và 89 sau ô 92.
 
 ## 5. Thử thách cá nhân
 
-SEED 7646 cho đề #3: thay hidden MLP bằng 4 và 512, so tham số, F1 và thời gian. Giữ 30 epoch, lr=0.001, batch size=64, cùng cách chia dữ liệu và đặt lại seed trước mỗi mạng.
+Ô 97 xác nhận đề #3. Code ô 98 đặt lại seed trước mỗi mạng, giữ 30 epoch, lr=0.001, batch size=64 và cùng dữ liệu. Output ô 98:
 
 | Hidden | Số tham số | F1 test | Train (s) |
 | --- | ---: | ---: | ---: |
-| 4 | 8009 | 0.964 | 3.249 |
-| 512 | 1025025 | 0.959 | 19.672 |
+| 4 | 8009 | 0.964 | 2.329 |
+| 512 | 1025025 | 0.959 | 20.044 |
 
-Với d=2000, số tham số là d×h+h+h+1. Mạng lớn có khoảng 128 lần tham số, train lâu hơn khoảng 6 lần nhưng không tăng F1. Chênh 0.005 chưa đủ khẳng định mạng nhỏ luôn tốt hơn. Tôi ưu tiên mạng nhỏ khi chất lượng tương đương, dữ liệu ít hoặc tài nguyên hạn chế.
+Mạng lớn có khoảng 128 lần tham số, train lâu hơn khoảng **8.61 lần**, F1 không tăng. Chênh 0.005 còn nhỏ nên chưa khẳng định mạng nhỏ luôn tốt hơn. Chọn mạng nhỏ khi chất lượng tương đương và cần tiết kiệm tài nguyên.
 
-Phần thử thách có AI hỗ trợ gợi ý code; kết quả trong bảng được học viên cung cấp sau khi chạy. Đề bài quy định phần này làm không dùng AI.
+Phần chữ ô 99 còn ghi 3.249/19.672 giây và khoảng 6 lần từ lần chạy khác; báo cáo dùng output 2.329/20.044 giây. Phần thử thách có AI hỗ trợ gợi ý code như đã trao đổi; không trình bày đây là bài làm độc lập không AI.
 
 ## 6. Phương án cho sản phẩm thật
 
-Với 10 triệu SMS/ngày (~116 tin/giây trung bình), mọi model phần 1–3 đạt p95 dưới 50 ms ở lần đo; kNN có throughput 115.349 tin/giây, còn thấp hơn tải trung bình nếu chỉ dùng cấu hình đo này. Cần thêm công suất cho giờ cao điểm và kiểm thử đồng thời. BoW + MLP nhanh và tốt trên test thường nhưng yếu trên stress test, nên chưa thể khẳng định đạt chất lượng thực tế. Trên biểu đồ SUB, Pareto gồm BoW + LogReg và BoW + MLP. SUB chỉ 40 tin nên sai một tin từ mức hoàn hảo đã làm 1−F1 thay đổi khoảng 2.44–2.56 điểm phần trăm.
+Ô 82: Pareto gồm BoW + LogReg và BoW + MLP. Đạt p95 dưới 50 ms: BoW + LogReg, BoW + MLP, Encoder + LogReg, Encoder + MLP head. kNN không đạt (64.557 ms), throughput 48.330 tin/giây cũng thấp hơn tải trung bình khoảng 116 tin/giây nếu chỉ dùng cấu hình đo này. LLM có p95 khoảng 2.03–2.85 giây, vượt SLA.
 
-Đề xuất router: model cục bộ xử lý tin chắc chắn, chuyển tin lưỡng lự hoặc có dấu hiệu ngoài phân phối sang LLM, kết hợp kiểm tra URL và đầu số. Không chỉ dựa vào xác suất vì model có thể tự tin khi sai. Nhánh LLM có p95 hơn 2 giây nên không đảm bảo SLA 50 ms; cần đo toàn hệ thống, xử lý bất đồng bộ hoặc thay bằng model cục bộ nếu mọi quyết định phải đáp ứng SLA.
+BoW + MLP nhanh (24820.638 tin/giây, p95 0.412 ms, train 8.146 giây) và F1 test 0.969 nhưng F1 stress test 0.410. Chưa thể khẳng định đạt chất lượng triển khai; cần dữ liệu đại diện và kiểm thử tải đồng thời, giờ cao điểm.
 
-Với 30 ngày, 300 triệu tin/tháng, chi phí tham khảo từ bảng làm tròn là khoảng 67.800 USD Sonnet zero-shot, 113.100 USD Opus và 192.600 USD Sonnet few-shot. Chưa gồm suy luận ẩn, vận hành hoặc giá nguồn 9Router thực tế. Nếu chỉ một phần tin đi LLM, chi phí còn phụ thuộc tỷ lệ chuyển tuyến và độ dài tin.
+Đề xuất router: model cục bộ xử lý tin chắc chắn, chuyển tin lưỡng lự hoặc bất thường sang LLM, kết hợp kiểm tra URL/đầu số. Không chỉ dựa vào khoảng xác suất vì model có thể tự tin khi sai. Chuẩn hóa từ biến dạng có thể hỗ trợ BoW nhưng cũng có nguy cơ làm sai tên riêng/số hợp lệ. Nhánh LLM chậm, cần đo p95 toàn hệ thống; nếu mọi quyết định phải dưới 50 ms thì xử lý LLM bất đồng bộ hoặc dùng model cục bộ khác.
+
+Với 30 ngày là 300 triệu tin/tháng. Tính từ chi phí 40 tin hiển thị ở ô 73/76: Sonnet zero-shot khoảng **67.875 USD/tháng**, Opus **113.100 USD/tháng**, Sonnet few-shot **192.675 USD/tháng**. Công thức: chi phí 40 tin × 300.000.000 / 40. Đây là phép ước tính từ số đã làm tròn trong output, chưa gồm suy luận ẩn và hạ tầng, không phải hóa đơn router. Nếu chỉ chuyển một phần tin sang LLM, chi phí phụ thuộc tỷ lệ chuyển tuyến và độ dài tin.
 
 ## 7. AI log phần 4 và điều đã học
 
-Bảng dưới đây chỉ ghi các tương tác ở Phần 4, không phải AI log đầy đủ cho toàn bộ bài. Báo cáo này được tổng hợp với AI hỗ trợ.
+Bảng giới hạn ở phần 4, không phải nhật ký AI đầy đủ toàn bài. Đã điều chỉnh nhận xét để khớp output thay vì phần trả lời cũ ở ô 99.
 
-| **Phần** | **Bạn hỏi AI gì (prompt)** | **AI trả lời/viết gì** | **Bạn đã sửa / kiểm chứng gì** |
+| Phần | Bạn hỏi AI gì | AI trả lời/viết gì | Đối chiếu trong notebook |
 | --- | --- | --- | --- |
-| 4 — Cấu hình API | Dùng 9Router cho Colab và chọn model Claude như thế nào? | Hướng dẫn cấu hình endpoint, Secret và hai model Sonnet/Opus Thinking. | Chạy thử API và xác nhận cả hai model trả lời được; lưu key trong Colab Secrets. |
-| 4.1 — Gọi API | Viết `call_openai` sát template. | Viết hàm gọi Chat Completions, lấy nội dung và đo độ trễ. | Chạy bộ kiểm tra giả lập; sửa vị trí import để mock hoạt động đúng. |
-| 4.2–4.3 — Prompt và parse | Viết prompt zero/few-shot và hàm đọc nhãn. | Viết prompt phân loại, chèn ví dụ và chuẩn hóa nhãn spam/ham/not spam. | Chạy các test của notebook, kiểm tra trường hợp phản hồi không rõ trả `None`. |
-| 4.4 — Phân loại theo lô | Hoàn thiện `llm_classify_batch`. | Viết vòng lặp gọi API, retry, đọc nhãn, lưu latency và ước tính chi phí. | Chạy test giả lập và phân loại 40 tin SUB bằng API thật. |
-| 4.A–4.B — Thí nghiệm | Gợi ý dự đoán và giải thích kết quả zero-shot/few-shot. | Gợi ý nhận định về F1, độ trễ và chi phí. | Đối chiếu kết quả: cả hai model đạt F1 = 1.000; few-shot giữ nguyên F1 nhưng chi phí ước tính tăng khoảng 2.84 lần. |
-| 4 — Chi phí | Thêm giá cho Sonnet và Opus. | Cung cấp bảng giá API tham khảo và code cập nhật `PRICE_PER_1M`. | Chạy lại thí nghiệm; ghi rõ chi phí chỉ là ước tính, chưa tính token suy luận ẩn và không phải hóa đơn 9Router. |
+| 4 — Cấu hình API | Dùng 9Router cho Colab và chọn Claude thế nào? | Endpoint, Secret và Sonnet/Opus | Ô 62 xác nhận cấu hình; ô 65/73 có phản hồi API |
+| 4.1 — Gọi API | Viết call_openai sát template | Hàm Chat Completions và đo latency; sửa import cho mock | Có code; danh sách cuối chưa ghi check 4.1 + 4.4 |
+| 4.2–4.3 | Viết prompt và parser | Prompt zero/few-shot, chuẩn hóa nhãn | Ô 67 ghi test đạt |
+| 4.4 | Hoàn thiện llm_classify_batch | Batch, retry, latency, chi phí | Ô 73/76 có kết quả thật, invalid=0; chưa có output test giả lập 4.1 + 4.4 |
+| 4.A–4.B | Gợi ý dự đoán và giải thích kết quả | Nhận định F1, tốc độ, chi phí | Sonnet 0.974, Opus 1.000, few-shot 1.000; tỷ lệ chi phí few-shot khoảng 2.84 |
+| 4 — Chi phí | Thêm giá Sonnet/Opus | Code bảng giá tham khảo | Có chi phí trong output; ghi rõ ước tính chưa gồm token suy luận ẩn |
 
-Tôi hiểu rằng precision cao vẫn có thể đi cùng recall thấp, và F1 không phải accuracy. Mạng lớn, model lớn hoặc few-shot không tự động cải thiện chất lượng; đánh giá trên case khó có thể thay đổi lựa chọn so với test thường. Prompt phòng thủ cũng có thể tạo lỗi chặn nhầm, nên cần kiểm tra cả lợi ích và tác dụng phụ.
+Tôi hiểu precision cao có thể đi cùng recall thấp, và F1 không phải accuracy. Mạng lớn hơn không tự đảm bảo tốt hơn; ở lần chạy này Opus và few-shot nhỉnh hơn Sonnet zero-shot nhưng SUB quá nhỏ để khẳng định ưu thế ổn định. Điểm stress test cho thấy chất lượng trên dữ liệu quen thuộc chưa chứng minh chất lượng ngoài thực tế.
